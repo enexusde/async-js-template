@@ -25,7 +25,7 @@ Example:
       render( 'foobar', 
               {myFantasicField:'hello'}, 
               function (htmlIncomming) {
-                alert(htmlIncomming); // alerts "hello"
+                alert(htmlIncomming); // alerts 'hello'
               }
             );">
      Run
@@ -45,14 +45,14 @@ This is easy too, just like this
       render( 'foobar', 
               {peoples:[{name:'Mike'},{name:'Marry'}]}, 
               function (htmlIncomming) {
-                alert(htmlIncomming); // alerts "Mike Marry"
-              }
+                alert(htmlIncomming); // alerts 'Mike Marry'
+              }
             );">
      Run
    </button>
    ```
 ## If, else, elseif and endif
-
+The classic If/else/endifs:
 ```
    <script id="foobar" type="text/asjstOrWhatever">
    {{if age <= 12}}
@@ -69,14 +69,14 @@ This is easy too, just like this
       render( 'foobar', 
               {age: 19}, 
               function (htmlIncomming) {
-                alert(htmlIncomming); // alerts "Youngster"
+                alert(htmlIncomming); // alerts  'Youngster'
               }
             );">
      Run
    </button>
    ```
 ## Load (Async)
-
+Loading asynchroneus requests like this:
 ```
    <script id="foobar" type="text/asjstOrWhatever">
 {{load 'http://www.example.de/rest/abc.json'}}
@@ -87,9 +87,36 @@ This is easy too, just like this
       render( 'foobar', 
               {age: 19}, 
               function (htmlIncomming) {
-                alert(htmlIncomming); // alerts "aha"
+                alert(htmlIncomming); // alerts 'aha'
               }
             );">
      Run
    </button>
    ```
+## Import 
+
+Import also works, but be warned: Its hard to debug imports because there is no way to differenticate linenumbers between two different script-tags. Import actually do a hard-import and linenumbers are interpreted as in the original script-tag. 
+
+```
+   <script id="head" type="text/asjstOrWhatever">
+     MyHead
+   </script>
+   <script id="foot" type="text/asjstOrWhatever">
+     MyFoot
+   </script>
+   <script id="main" type="text/asjstOrWhatever">
+     {{import head}}
+     {{import foot}}
+   </script>
+   <button onclick="
+      render( 'main', 
+              {}, 
+              function (htmlIncomming) {
+                alert(htmlIncomming); // alerts 'MyHead MyFoot'
+              }
+            );">
+     Run
+   </button>
+   ```
+
+
