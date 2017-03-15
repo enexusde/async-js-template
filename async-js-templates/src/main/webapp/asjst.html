@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>Welcome!</title>
+<meta charset="utf-8" />
+<meta http-equiv="cache-control" content="max-age=0">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<script src="js/jquery-1.8.2.js"></script>
+<script src="js/asjst.js"></script>
+</head>
+<body>
+	<script>
+		function r(no, json) {
+			render('work' + no, json, function(html) {
+				html = html.replace(/\s/g, '');
+				$('#result' + no).val(html);
+			});
+		}
+	</script>
+	<script type="text/asjst" id="work1">
+{{if bar == 0}}
+	a
+{{else if bar == 1}}
+	b
+{{else}}
+	c{{bar}}a{{bar}}m
+{{/if}}
+</script>
+	<button id="test1" onclick="r(1,{bar:2});">Test1</button>
+	<input id="result1" />
+	<br />
+
+	<script type="text/asjst" id="work2">
+{{for lst}}
+	{{it}}
+{{/for}}
+	</script>
+	<button id="test2" onclick="r(2,{lst:['d','e','f']})">Test2</button>
+	<input id="result2" />
+	<br />
+
+	<script type="text/asjst" id="work3">
+{{for lst}}
+	{{for abc}}
+		{{it}}
+	{{/for}}
+{{/for}}
+	</script>
+	<button id="test3" onclick="r(3,{lst:['d','e','f'], abc:['a','b']})">Test3</button>
+	<input id="result3" />
+
+	<br />
+	<!-- json part -->
+	<script type="text/asjst" id="work4">
+{{for ids}}
+	{{load 'data/user/' + d + '.js'}}
+		{{name}}
+	{{/load}}
+{{/for}}
+	</script>
+	<button id="test4" onclick="r(4,{ids:[{d:2},{d:5}]})">Test4</button>
+	<input id="result4" value="" />
+	<br />
+
+	<script id="btn" type="text/x-jsrender" relative="65">3{{text}}5</script>
+
+	<script id="work5" type="text/x-jsrender" relative="71">0
+{{for lst}}1
+2{{import btn}}6
+7{{/for}}8</script>
+	<button id="test5" onclick="r(5,{lst:[{text:4}]})">Test5
+		(Import)</button>
+	<input id="result5" value="" />
+	<br />
+
+
+
+	<script id="work6" type="text/x-jsrender" relative="69">
+		{{for new Array(count).join(',').split(',')}}
+			{{index + 1}}
+		{{/for}}
+	</script>
+
+	<button id="test6" onclick="r(6,{count:3});">test6</button>
+	<input id="result6" value="" />
+	<br />
+</body>
+</html>

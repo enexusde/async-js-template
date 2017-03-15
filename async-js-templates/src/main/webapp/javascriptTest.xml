@@ -1,0 +1,30 @@
+<project name="testproject" default="test" basedir=".">
+	<target name="test">
+		<webtest name="Create Admin account">
+			<config resultpath="target/webtest" host="localhost" port="8081" summary="true" browser="IE7" />
+			<invoke url="/asjst.html" />
+
+			
+			
+			
+			<clickElement htmlId="test1"/>
+			<verifyInputField htmlId="result1" value="c2a2m" />
+
+			<clickElement htmlId="test2"/>
+			<verifyInputField htmlId="result2" value="def" />
+
+			<clickElement htmlId="test3"/>
+			<verifyInputField htmlId="result3" value="ababab" />
+
+			<clickElement htmlId="test4"/>
+			<sleep milliseconds="100"/>
+			<verifyInputField htmlId="result4" value="MarryMike" />
+
+			<clickElement htmlId="test5"/>
+			<verifyInputField htmlId="result5" value="012345678" />
+
+			<clickElement htmlId="test6"/>
+			<verifyInputField htmlId="result6" value="123" />
+		</webtest>
+	</target>
+</project>

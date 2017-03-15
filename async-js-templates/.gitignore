@@ -1,0 +1,6 @@
+/target/
+/.settings/
+/.externalToolBuilders/
+/.classpath
+/.project
+/webtest-results/

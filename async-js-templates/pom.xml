@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.e-nexus</groupId>
+	<artifactId>async-js-templates</artifactId>
+	<version>0.0.2-SNAPSHOT</version>
+	<properties>
+		<tomcat.ignorePackaging>true</tomcat.ignorePackaging>
+		<maven.tomcat.path>/</maven.tomcat.path>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>com.canoo.webtest</groupId>
+			<artifactId>webtest</artifactId>
+			<version>3.0</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-plus</artifactId>
+			<version>9.3.9.v20160517</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
