@@ -85,7 +85,7 @@ Loading asynchroneus requests like this:
    </script>
    <button onclick="
       render( 'foobar', 
-              {age: 19}, 
+              {}, 
               function (htmlIncomming) {
                 alert(htmlIncomming); // alerts 'aha'
               }
