@@ -95,7 +95,7 @@ Loading asynchroneus requests like this:
    ```
 ## Import 
 
-Import also works, but be warned: Its hard to debug imports because there is no way to differenticate linenumbers between two different script-tags. Import actually do a hard-import and linenumbers are interpreted as in the original script-tag. 
+Import also works, but be warned: Its hard to debug imports because the linenumbers differ between two different script-tags. Import actually do a hard-import and linenumbers are interpreted as in the original script-tag. 
 
 ```
    <script id="head" type="text/asjstOrWhatever">
