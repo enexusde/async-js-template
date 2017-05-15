@@ -1,5 +1,5 @@
 # async-js-template
-Asynchron javascript templates
+Speed up your website using asynchron rest calls in javascript templates
 
 Templateengine for asynchrouneus JSON requests.
 
