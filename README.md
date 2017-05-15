@@ -31,7 +31,7 @@ Example:
      Run
    </button>
    ```
-## Loop throu Arrays
+## Loop
 
 This is easy too, just like this
 
