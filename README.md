@@ -1,4 +1,4 @@
-<img src="sync.png" width="150"/>&nbsp;<img src="Bildschirmfoto 2017-05-19 um 14.39.57.png" width="150"/>
+<img src="sync.png" height="250"/>&nbsp;<img src="Bildschirmfoto 2017-05-19 um 14.39.57.png" height="250"/>
 
 # async-js-template
 Speed up your website using asynchron rest calls in javascript templates
