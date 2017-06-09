@@ -41,35 +41,43 @@ function load(errFn, url, extra, fn, homeworkObject) {
 	homeworkObject["call" + e] = {
 		placeholder : spf + e + epf
 	};
-	var opts = {
-		url : url,
-		contentType : 'application/json',
-		processData : false,
-		dataType : 'json',
-		error : errFn,
-		success : function(data, xhr) {
-			var txt = fn(data);
-			homeworkObject["call" + e].value = txt;
-			homeworkObject.tasksSolved++;
-			if (homeworkObject.tasksOutstanding == homeworkObject.tasksSolved) {
-				var txt = homeworkObject.txt;
-				while (txt.indexOf(spf) > -1) {
-					for (var nr = 1; nr < homeworkObject.tasksSolved + 1; nr++) {
-						var call = homeworkObject["call" + nr];
-						var placeholderPos = txt.indexOf(call.placeholder);
-						if (placeholderPos > -1) {
-							txt = txt.substr(0, placeholderPos) + call.value + txt.substr(placeholderPos + call.placeholder.length);
-						}
+	
+	function incomming(data) {
+		homeworkObject.cache[url] = data;
+		var txt = fn(data);
+		homeworkObject["call" + e].value = txt;
+		homeworkObject.tasksSolved++;
+		if (homeworkObject.tasksOutstanding == homeworkObject.tasksSolved) {
+			var txt = homeworkObject.txt;
+			while (txt.indexOf(spf) > -1) {
+				for (var nr = 1; nr < homeworkObject.tasksSolved + 1; nr++) {
+					var call = homeworkObject["call" + nr];
+					var placeholderPos = txt.indexOf(call.placeholder);
+					if (placeholderPos > -1) {
+						txt = txt.substr(0, placeholderPos) + call.value + txt.substr(placeholderPos + call.placeholder.length);
 					}
 				}
-				homeworkObject.func(txt);
 			}
-
+			homeworkObject.func(txt);
 		}
-	};
-	jQuery.extend(true, opts, ajaxOptions);
-
-	jQuery.ajax(opts)
+	}
+	
+	
+	if(typeof homeworkObject.cache[url] !== 'undefined'){
+		incomming(homeworkObject.cache[url]);
+	} else {
+		var opts = {
+			url : url,
+			contentType : 'application/json',
+			processData : false,
+			dataType : 'json',
+			error : errFn,
+			success : incomming
+		};
+		jQuery.extend(true, opts, ajaxOptions);
+	
+		jQuery.ajax(opts)
+	}
 	return homeworkObject["call" + e].placeholder;
 }
 
@@ -214,21 +222,18 @@ function render(id, json, cb) {
 	try {
 		f = new Function(script);
 	} catch (e) {
-		codeLines[e.lineNumber - 1] = codeLines[e.lineNumber - 1] + "   <------------------------------------- " + e.message;
+		if (e.lineNumber != undefined) {
+			codeLines[e.lineNumber - 1] = codeLines[e.lineNumber - 1] + "   <------------------------------------- " + e.message;
+		}
 		throw e.message + "\n" + codeLines.join("\n");
 	}
 	var homeworkObject = {
 		func : cb,
 		tasksOutstanding : 0,
-		tasksSolved : 0
+		tasksSolved : 0,
+		cache: {}
 	};
 	homeworkObject.txt = f(json, homeworkObject);
 	if (homeworkObject.tasksOutstanding == 0)
 		(cb(homeworkObject.txt));
 }
-
-
-
-
-
-

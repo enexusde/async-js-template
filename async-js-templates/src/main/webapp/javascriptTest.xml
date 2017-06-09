@@ -4,8 +4,7 @@
 			<config resultpath="target/webtest" host="localhost" port="8081" summary="true" browser="IE7" />
 			<invoke url="/asjst.html" />
 
-			
-			
+			<clickElement htmlId="testParser"/>
 			
 			<clickElement htmlId="test1"/>
 			<verifyInputField htmlId="result1" value="c2a2m" />

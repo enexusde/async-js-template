@@ -7,6 +7,8 @@ var baseURL = '';
 var ajaxOptions = {};
 var spf = '🎸';
 var epf = '🎻';
+// general exception interception line number of last successfull code line
+var geilnolscl = undefined;
 
 function DEFAULT_THROW_XHR(x, m, c) {
 	throw m + x + c;
@@ -17,59 +19,74 @@ function excape(line, no, linebreakDefaultTrue) {
 	if (l == 1)
 		throw "Need lineNo";
 	var pfx = l === 2 ? '\\n' : '';
-	if (line.indexOf("'") == -1) {
+	if (line.indexOf("'") == -1) { // no '
 		line = varlbl + " += '" + pfx + line + "';";
-	} else if (line.indexOf('"') == -1) {
+	} else if (line.indexOf('"') == -1) { // no "
 		line = varlbl + ' += "' + pfx + line + '";';
-	} else {
-		// use " by default.
-		var first;
-		var n = varlbl + ' += "\\n" + ';
-		while ((first = line.indexOf('"')) > 0) {
-			n += '"' + line.substring(0, first) + '"+' + "'" + '"' + "'+";
-			line = line.substring(first + 1);
-		}
-		n += '"' + line + '";';
-		line = n;
+	} else { // " and '
+		var tueddelchenParts = line.split('"');
+		line = tueddelchenParts.join('\\"')
+		line = varlbl + ' += "' + pfx + line + '";';
 	}
 	return line;
 }
 
 var unresolvedResult = "";
-function load(errFn, url, extra, fn, homeworkObject) {
+function load(lineNo, errFn, url, extra, fn, homeworkObject) {
 	var e = ++homeworkObject.tasksOutstanding;
 	homeworkObject["call" + e] = {
 		placeholder : spf + e + epf
 	};
-	var opts = {
-		url : url,
-		contentType : 'application/json',
-		processData : false,
-		dataType : 'json',
-		error : errFn,
-		success : function(data, xhr) {
-			var txt = fn(data);
-			homeworkObject["call" + e].value = txt;
-			homeworkObject.tasksSolved++;
-			if (homeworkObject.tasksOutstanding == homeworkObject.tasksSolved) {
-				var txt = homeworkObject.txt;
-				while (txt.indexOf(spf) > -1) {
-					for (var nr = 1; nr < homeworkObject.tasksSolved + 1; nr++) {
-						var call = homeworkObject["call" + nr];
-						var placeholderPos = txt.indexOf(call.placeholder);
-						if (placeholderPos > -1) {
-							txt = txt.substr(0, placeholderPos) + call.value + txt.substr(placeholderPos + call.placeholder.length);
-						}
+	
+	function incomming(data) {
+		homeworkObject.cache[url] = data;
+		
+		var txt;
+		try {
+			txt = fn(data);
+		} catch(e) {
+			var source = e.stack.split("\n")[1].split(":");
+			var msg = e.message 
+			if (typeof geilnolscl !== 'undefined') {
+				msg += ' after line ' + geilnolscl;
+			}
+			if (typeof SyntaxError === 'function') {
+				throw new SyntaxError(msg, document.location.pathname, lineNo);
+			} else throw msg + " in async block of line " + lineNo;
+		}
+		homeworkObject["call" + e].value = txt;
+		homeworkObject.tasksSolved++;
+		if (homeworkObject.tasksOutstanding == homeworkObject.tasksSolved) {
+			var txt = homeworkObject.txt;
+			while (txt.indexOf(spf) > -1) {
+				for (var nr = 1; nr < homeworkObject.tasksSolved + 1; nr++) {
+					var call = homeworkObject["call" + nr];
+					var placeholderPos = txt.indexOf(call.placeholder);
+					if (placeholderPos > -1) {
+						txt = txt.substr(0, placeholderPos) + call.value + txt.substr(placeholderPos + call.placeholder.length);
 					}
 				}
-				homeworkObject.func(txt);
 			}
-
+			homeworkObject.func(txt);
 		}
-	};
-	jQuery.extend(true, opts, ajaxOptions);
-
-	jQuery.ajax(opts)
+	}
+	
+	
+	if(typeof homeworkObject.cache[url] !== 'undefined'){
+		incomming(homeworkObject.cache[url]);
+	} else {
+		var opts = {
+			url : url,
+			contentType : 'application/json',
+			processData : false,
+			dataType : 'json',
+			error : errFn,
+			success : incomming
+		};
+		jQuery.extend(true, opts, ajaxOptions);
+	
+		jQuery.ajax(opts)
+	}
 	return homeworkObject["call" + e].placeholder;
 }
 
@@ -167,7 +184,7 @@ function render(id, json, cb) {
 				no--;
 				line = excape(line.substr(0, open), lineIdx + relative) + "}; it = c" + no + "; " + excape(line.substr(close + 2), lineIdx + relative);
 			} else if (openLoad) {
-				line = excape(line.substr(0, open), lineIdx + relative) + " " + varlbl + " += load(DEFAULT_THROW_XHR," + cmd.substr(7, cmd.length - 9) + ", it, function(it){var "
+				line = excape(line.substr(0, open), lineIdx + relative) + " " + varlbl + " += load(" + (lineIdx + relative) + ", DEFAULT_THROW_XHR, " + cmd.substr(7, cmd.length - 9) + ", it, function(it){var "
 						+ varlbl + "=''; with(it){ " + excape(line.substr(close + 2), lineIdx + relative, false);
 			} else if (closeLoad) {
 				line = excape(line.substr(0, open), lineIdx + relative) + " }return " + varlbl + ";}, homeworkObject); "
@@ -184,7 +201,6 @@ function render(id, json, cb) {
 					codeLines.splice(lineIdx + 1 + int, 0, insertlines[int]);
 				}
 				codeLines[lineIdx+int+1] = after + codeLines[lineIdx+int+1];
-				//+ "+"').html() " + excape(line.substr(close + 2), lineIdx + relative);
 			} else {
 				var array = line.split("{{");
 				line = excape(array[0], lineIdx + relative);
@@ -203,7 +219,7 @@ function render(id, json, cb) {
 		} else {
 			line = excape(line, lineIdx + relative);
 		}
-		codeLines[lineIdx] = '/* ' + (lineIdx + relative) + ' */ ' + line;
+		codeLines[lineIdx] = '/* ' + (lineIdx + relative) + ' */ ' + line + "geilnolscl="+(lineIdx + relative)+";";
 	}
 	var script = "var currentIdx, " + indexVar + "," + evenVar + "," + oddVar + ", json = arguments[0], homeworkObject = arguments[1], it = json, c0; with (json){var " + varlbl
 			+ "='';" + codeLines.join("\n") + " return " + varlbl + ";}";
@@ -214,21 +230,19 @@ function render(id, json, cb) {
 	try {
 		f = new Function(script);
 	} catch (e) {
-		codeLines[e.lineNumber - 1] = codeLines[e.lineNumber - 1] + "   <------------------------------------- " + e.message;
+		if (e.lineNumber != undefined) {
+			codeLines[e.lineNumber - 1] = codeLines[e.lineNumber - 1] + "   <------------------------------------- " + e.message;
+		}
 		throw e.message + "\n" + codeLines.join("\n");
 	}
 	var homeworkObject = {
 		func : cb,
 		tasksOutstanding : 0,
-		tasksSolved : 0
+		tasksSolved : 0,
+		cache: {}
 	};
 	homeworkObject.txt = f(json, homeworkObject);
 	if (homeworkObject.tasksOutstanding == 0)
 		(cb(homeworkObject.txt));
+	
 }
-
-
-
-
-
-
