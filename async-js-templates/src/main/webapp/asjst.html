@@ -16,8 +16,8 @@
 	<script>
 		function r(no, json) {
 			render('work' + no, json, function(html) {
-				html = html.replace(/\s/g, '');
-				$('#result' + no).val(html);
+				var html2 = html.replace(/\s/g, '');
+				$('#result' + no).val(html2);
 			});
 		}
 	</script>
@@ -91,6 +91,15 @@
 
 	<button id="test6" onclick="r(6,{count:3});">test6</button>
 	<input id="result6" value="" />
+
+	<script id="work7" type="text/x-jsrender" relative="69">
+		{{load 'missing-file.json'}}
+			{{404}}
+			Missing
+		{{/load}}
+	</script>
+	<button id="test7" onclick="r(7,{count:3});">test7</button>
+	<input id="result7" value="" />
 	<br />
 </body>
 </html>

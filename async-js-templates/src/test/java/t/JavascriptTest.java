@@ -69,6 +69,9 @@ public class JavascriptTest {
 						if(path.startsWith("/log")){
 							System.out.println("                     ("+path+")");
 						}
+						if(path.startsWith("/missing-file.json")){
+							return null;
+						}
 						return super.getResource(path);
 					}
 				};

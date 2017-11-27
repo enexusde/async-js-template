@@ -1,4 +1,4 @@
-var asjstDbg = false;
+var asjstDbg = true;
 var varlbl = "crdxf";
 var indexVar = 'index';
 var evenVar = 'even';
@@ -38,25 +38,12 @@ function load(lineNo, errFn, url, extra, fn, homeworkObject) {
 		placeholder : spf + e + epf
 	};
 	
-	function incomming(data) {
-		homeworkObject.cache[url] = data;
-		
-		var txt;
-		try {
-			txt = fn(data);
-		} catch(e) {
-			var source = e.stack.split("\n")[1].split(":");
-			var msg = e.message 
-			if (typeof geilnolscl !== 'undefined') {
-				msg += ' after line ' + geilnolscl;
-			}
-			if (typeof SyntaxError === 'function') {
-				throw new SyntaxError(msg, document.location.pathname, lineNo);
-			} else throw msg + " in async block of line " + lineNo;
-		}
+	function solve(txt) {
 		homeworkObject["call" + e].value = txt;
-		homeworkObject.tasksSolved++;
+		homeworkObject.tasksSolved ++;
 		if (homeworkObject.tasksOutstanding == homeworkObject.tasksSolved) {
+			
+			
 			var txt = homeworkObject.txt;
 			while (txt.indexOf(spf) > -1) {
 				for (var nr = 1; nr < homeworkObject.tasksSolved + 1; nr++) {
@@ -71,6 +58,41 @@ function load(lineNo, errFn, url, extra, fn, homeworkObject) {
 		}
 	}
 	
+	function incomming(data) {
+		homeworkObject.cache[url] = data;
+		var txt;
+		try {
+			txt = fn(data);
+		} catch(e) {
+			var source = e.stack.split("\n")[1].split(":");
+			var msg = e.message 
+			if (typeof geilnolscl !== 'undefined') {
+				msg += ' after line ' + geilnolscl;
+			}
+			if (typeof SyntaxError === 'function') {
+				throw new SyntaxError(msg, document.location.pathname, lineNo);
+			} else throw msg + " in async block of line " + lineNo;
+		}
+		solve(txt);
+	}
+	function errorhandler(xhr, status, errorString) {
+		var txt;
+		try {
+			txt = fn({httpStatusCode:xhr.status});
+			
+		} catch(e) {
+			var source = e.stack.split("\n")[1].split(":");
+			var msg = e.message 
+			if (typeof geilnolscl !== 'undefined') {
+				msg += ' after line ' + geilnolscl;
+			}
+			if (typeof SyntaxError === 'function') {
+				throw new SyntaxError(msg, document.location.pathname, lineNo);
+			} else throw msg + " in async block of line " + lineNo;
+		}
+		solve(txt);
+	}
+	
 	
 	if(typeof homeworkObject.cache[url] !== 'undefined'){
 		incomming(homeworkObject.cache[url]);
@@ -81,7 +103,8 @@ function load(lineNo, errFn, url, extra, fn, homeworkObject) {
 			processData : false,
 			dataType : 'json',
 			error : errFn,
-			success : incomming
+			success : incomming,
+			error : errorhandler
 		};
 		jQuery.extend(true, opts, ajaxOptions);
 	
@@ -135,6 +158,7 @@ function render(id, json, cb) {
 	}
 	var no = 0;
 	var codeLines = code.split("\n");
+	var statusCodes=[];
 	for (var lineIdx = 0; lineIdx < codeLines.length; lineIdx++) {
 		var line = codeLines[lineIdx];
 		var open = line.indexOf("{{");
@@ -153,10 +177,10 @@ function render(id, json, cb) {
 			var closeFor = cmd[2] === '/' && cmd[3] === 'f' && cmd[4] === 'o' && cmd[5] === 'r';
 			var openLoad = cmd[2] === 'l' && cmd[3] === 'o' && cmd[4] === 'a' && cmd[5] === 'd' && cmd[6] === ' ';
 			var closeLoad = cmd[2] === '/' && cmd[3] === 'l' && cmd[4] === 'o' && cmd[5] === 'a' && cmd[6] === 'd' && cmd[7] === '}';
+			var isStatusCode = !isNaN(cmd[2]+cmd[3]+cmd[4]) && close-open==5;
 			var imp = cmd[2] === 'i' && cmd[3] === 'm' && cmd[4] === 'p' && cmd[5] === 'o' && cmd[6] === 'r' && cmd[7] === 't' && cmd[8] === ' ';
 
 			var isCommand = openIf || closeIf || elseIf || elseIfCond || openFor || closeFor || openLoad || closeLoad || imp;
-
 			if (isCommand && line.indexOf("{{", open + 1) > -1) {
 				throw 'only one command per line[:' + (lineIdx + relative) + '] please, i may like to correct the indention and the command' + cmd + ' is already set!';
 			}
@@ -184,11 +208,16 @@ function render(id, json, cb) {
 				no--;
 				line = excape(line.substr(0, open), lineIdx + relative) + "}; it = c" + no + "; " + excape(line.substr(close + 2), lineIdx + relative);
 			} else if (openLoad) {
+				statusCodes.push(undefined);
 				line = excape(line.substr(0, open), lineIdx + relative) + " " + varlbl + " += load(" + (lineIdx + relative) + ", DEFAULT_THROW_XHR, " + cmd.substr(7, cmd.length - 9) + ", it, function(it){var "
 						+ varlbl + "=''; with(it){ " + excape(line.substr(close + 2), lineIdx + relative, false);
 			} else if (closeLoad) {
-				line = excape(line.substr(0, open), lineIdx + relative) + " }return " + varlbl + ";}, homeworkObject); "
-						+ excape(line.substr(close + 2), lineIdx + relative, false);
+				line = excape(line.substr(0, open), lineIdx + relative) + " }return " + varlbl + ";}, homeworkObject); " + excape(line.substr(close + 2), lineIdx + relative, false);
+				var undefinedBefore = typeof statusCodes[statusCodes.length - 1] == 'undefined';
+				statusCodes.pop();
+				if (!undefinedBefore) {
+					line = "}" + line;
+				}
 			} else if (imp) {
 				var newline = excape(line.substr(0, open), lineIdx + relative);
 				var after = line.substr(close+2);
@@ -201,6 +230,22 @@ function render(id, json, cb) {
 					codeLines.splice(lineIdx + 1 + int, 0, insertlines[int]);
 				}
 				codeLines[lineIdx+int+1] = after + codeLines[lineIdx+int+1];
+			} else if (!isNaN(code)) {
+				if (typeof oldcode !== 'undefined' && code!=oldcode) {
+					line = excape(line.substr(0, open), lineIdx + relative) + " } else if (httpStatusCode == " + code + ") {" + excape(line.substr(close + 2), lineIdx + relative, false);
+				} else {
+					line = excape(line.substr(0, open), lineIdx + relative) + " if (httpStatusCode == " + code + ") {" + excape(line.substr(close + 2), lineIdx + relative, false);
+				}
+				oldcode=code;
+			} else if (isStatusCode) {
+				var undefinedBefore = typeof statusCodes[statusCodes.length - 1] == 'undefined';
+				var code = (cmd[2] + cmd[3] + cmd[4]) * 1;
+				statusCodes[statusCodes.length - 1] = code;
+				if (undefinedBefore) {
+					line = excape(line.substr(0, open), lineIdx + relative) + " if (httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + excape(line.substr(close + 2), lineIdx + relative, false);
+				} else {
+					line = excape(line.substr(0, open), lineIdx + relative) + " } else if (httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + excape(line.substr(close + 2), lineIdx + relative, false);
+				}
 			} else {
 				var array = line.split("{{");
 				line = excape(array[0], lineIdx + relative);
@@ -227,9 +272,11 @@ function render(id, json, cb) {
 	if (thr !== undefined) {
 		throw "Caused by Throw-Attribute: "+ script;
 	}
+	// throw script;
 	try {
 		f = new Function(script);
 	} catch (e) {
+		throw script;
 		if (e.lineNumber != undefined) {
 			codeLines[e.lineNumber - 1] = codeLines[e.lineNumber - 1] + "   <------------------------------------- " + e.message;
 		}

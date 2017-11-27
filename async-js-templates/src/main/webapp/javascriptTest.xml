@@ -4,26 +4,32 @@
 			<config resultpath="target/webtest" host="localhost" port="8081" summary="true" browser="IE7" />
 			<invoke url="/asjst.html" />
 
-			<clickElement htmlId="testParser"/>
-			
-			<clickElement htmlId="test1"/>
+			<clickElement htmlId="testParser" />
+
+			<clickElement htmlId="test1" />
 			<verifyInputField htmlId="result1" value="c2a2m" />
 
-			<clickElement htmlId="test2"/>
+			<clickElement htmlId="test2" />
 			<verifyInputField htmlId="result2" value="def" />
 
-			<clickElement htmlId="test3"/>
+			<clickElement htmlId="test3" />
 			<verifyInputField htmlId="result3" value="ababab" />
 
-			<clickElement htmlId="test4"/>
-			<sleep milliseconds="100"/>
+			<clickElement htmlId="test4" />
+			<sleep milliseconds="100" />
 			<verifyInputField htmlId="result4" value="MarryMike" />
 
-			<clickElement htmlId="test5"/>
+			<clickElement htmlId="test5" />
 			<verifyInputField htmlId="result5" value="012345678" />
 
-			<clickElement htmlId="test6"/>
+			<clickElement htmlId="test6" />
 			<verifyInputField htmlId="result6" value="123" />
+
+			<clickElement htmlId="test7" />
+			<retry description="retry nested steps until the visit count is 3" maxcount="10">
+				<sleep milliseconds="200" />
+				<verifyInputField htmlId="result7" value="Missing" />
+			</retry>
 		</webtest>
 	</target>
 </project>
