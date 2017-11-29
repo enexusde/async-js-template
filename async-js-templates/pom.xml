@@ -28,4 +28,26 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>ossrh Central Repository (release)</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<id>ossrh Central Repository (snapshot)</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<scm>
+		<url>https://github.com/enexusde/async-js-template</url>
+		<connection>scm:git:git://github.com/enexusde/async-js-template.git</connection>
+		<developerConnection>scm:git:git@github.com:enexusde/async-js-template.git</developerConnection>
+	</scm>
+	<developers>
+		<developer>
+			<email>async-js-template-maven@e-nexus.de</email>
+			<name>Peter Rader (Grim)</name>
+			<url>http://www.e-nexus.de/async-js-template</url>
+		</developer>
+	</developers>
 </project>
