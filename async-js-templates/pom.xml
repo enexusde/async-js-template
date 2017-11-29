@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.e-nexus</groupId>
 	<artifactId>async-js-templates</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<properties>
 		<tomcat.ignorePackaging>true</tomcat.ignorePackaging>
 		<maven.tomcat.path>/</maven.tomcat.path>
@@ -42,7 +41,8 @@
 		<url>https://github.com/enexusde/async-js-template</url>
 		<connection>scm:git:git://github.com/enexusde/async-js-template.git</connection>
 		<developerConnection>scm:git:git@github.com:enexusde/async-js-template.git</developerConnection>
-	</scm>
+	  <tag>async-js-templates-0.0.2</tag>
+  </scm>
 	<developers>
 		<developer>
 			<email>async-js-template-maven@e-nexus.de</email>
