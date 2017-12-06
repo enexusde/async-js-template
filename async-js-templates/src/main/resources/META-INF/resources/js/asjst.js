@@ -10,8 +10,8 @@ var epf = '🎻';
 // general exception interception line number of last successfull code line
 var geilnolscl = undefined;
 
-function DEFAULT_THROW_XHR(x, m, c) {
-	throw m + x + c;
+function allResultsExists(homeworkObject){
+	return homeworkObject.tasksOutstanding == homeworkObject.tasksSolved;
 }
 
 function excape(line, no, linebreakDefaultTrue) {
@@ -32,7 +32,7 @@ function excape(line, no, linebreakDefaultTrue) {
 }
 
 var unresolvedResult = "";
-function load(lineNo, errFn, url, extra, fn, homeworkObject) {
+function load(lineNo, url, extra, fn, homeworkObject) {
 	var e = ++homeworkObject.tasksOutstanding;
 	homeworkObject["call" + e] = {
 		placeholder : spf + e + epf
@@ -41,9 +41,7 @@ function load(lineNo, errFn, url, extra, fn, homeworkObject) {
 	function solve(txt) {
 		homeworkObject["call" + e].value = txt;
 		homeworkObject.tasksSolved ++;
-		if (homeworkObject.tasksOutstanding == homeworkObject.tasksSolved) {
-			
-			
+		if (allResultsExists(homeworkObject)) {
 			var txt = homeworkObject.txt;
 			while (txt.indexOf(spf) > -1) {
 				for (var nr = 1; nr < homeworkObject.tasksSolved + 1; nr++) {
@@ -57,52 +55,56 @@ function load(lineNo, errFn, url, extra, fn, homeworkObject) {
 			homeworkObject.func(txt);
 		}
 	}
-	
+	function handleTemplateError(e){
+		if (typeof e.stack === 'undefined')
+			throw e;
+		var source = e.stack.split("\n")[1].split(":");
+		var msg = e.message 
+		if (typeof geilnolscl !== 'undefined') {
+			msg += ' after line ' + geilnolscl;
+		}
+		if (typeof SyntaxError === 'function') {
+			throw new SyntaxError(msg, document.location.pathname, lineNo);
+		} else throw msg + " in async block of line " + lineNo;
+	}
 	function incomming(data) {
-		homeworkObject.cache[url] = data;
+		homeworkObject.cache[url] = {incommingData:data};
 		var txt;
 		try {
 			txt = fn(data);
 		} catch(e) {
-			var source = e.stack.split("\n")[1].split(":");
-			var msg = e.message 
-			if (typeof geilnolscl !== 'undefined') {
-				msg += ' after line ' + geilnolscl;
-			}
-			if (typeof SyntaxError === 'function') {
-				throw new SyntaxError(msg, document.location.pathname, lineNo);
-			} else throw msg + " in async block of line " + lineNo;
+			handleTemplateError(e);
 		}
 		solve(txt);
 	}
-	function errorhandler(xhr, status, errorString) {
+	function errorhandler(xhr) {
+		homeworkObject.cache[url] = {errorhandlerData:xhr};
 		var txt;
+		var jsonObject = {
+			httpStatusCode: xhr.status
+		};
 		try {
-			txt = fn({httpStatusCode:xhr.status});
-			
+			txt = fn(jsonObject);
 		} catch(e) {
-			var source = e.stack.split("\n")[1].split(":");
-			var msg = e.message 
-			if (typeof geilnolscl !== 'undefined') {
-				msg += ' after line ' + geilnolscl;
-			}
-			if (typeof SyntaxError === 'function') {
-				throw new SyntaxError(msg, document.location.pathname, lineNo);
-			} else throw msg + " in async block of line " + lineNo;
+			handleTemplateError(e);
 		}
 		solve(txt);
 	}
 	
 	
 	if(typeof homeworkObject.cache[url] !== 'undefined'){
-		incomming(homeworkObject.cache[url]);
+		var cache = homeworkObject.cache[url];
+		if (typeof cache.incommingData !== 'undefined'){
+			incomming(cache.incommingData);
+		} else {
+			errorhandler(cache.errorhandlerData);
+		}
 	} else {
 		var opts = {
 			url : url,
 			contentType : 'application/json',
 			processData : false,
 			dataType : 'json',
-			error : errFn,
 			success : incomming,
 			error : errorhandler
 		};
@@ -110,7 +112,8 @@ function load(lineNo, errFn, url, extra, fn, homeworkObject) {
 	
 		jQuery.ajax(opts)
 	}
-	return homeworkObject["call" + e].placeholder;
+	var ph = homeworkObject["call" + e].placeholder;
+	return ph;
 }
 
 function render(id, json, cb) {
@@ -159,6 +162,7 @@ function render(id, json, cb) {
 	var no = 0;
 	var codeLines = code.split("\n");
 	var statusCodes=[];
+	var oldcode;
 	for (var lineIdx = 0; lineIdx < codeLines.length; lineIdx++) {
 		var line = codeLines[lineIdx];
 		var open = line.indexOf("{{");
@@ -209,14 +213,15 @@ function render(id, json, cb) {
 				line = excape(line.substr(0, open), lineIdx + relative) + "}; it = c" + no + "; " + excape(line.substr(close + 2), lineIdx + relative);
 			} else if (openLoad) {
 				statusCodes.push(undefined);
-				line = excape(line.substr(0, open), lineIdx + relative) + " " + varlbl + " += load(" + (lineIdx + relative) + ", DEFAULT_THROW_XHR, " + cmd.substr(7, cmd.length - 9) + ", it, function(it){var "
+				line = excape(line.substr(0, open), lineIdx + relative) + " " + varlbl + " += load(" + (lineIdx + relative) + ", " + cmd.substr(7, cmd.length - 9) + ", it, function(it){var "
 						+ varlbl + "=''; with(it){ " + excape(line.substr(close + 2), lineIdx + relative, false);
 			} else if (closeLoad) {
 				line = excape(line.substr(0, open), lineIdx + relative) + " }return " + varlbl + ";}, homeworkObject); " + excape(line.substr(close + 2), lineIdx + relative, false);
-				var undefinedBefore = typeof statusCodes[statusCodes.length - 1] == 'undefined';
+				var thisCode = statusCodes[statusCodes.length - 1];
+				var undefinedBefore = typeof thisCode == 'undefined';
 				statusCodes.pop();
 				if (!undefinedBefore) {
-					line = "}" + line;
+					line = "}/*close code "+thisCode+"*/" + line;
 				}
 			} else if (imp) {
 				var newline = excape(line.substr(0, open), lineIdx + relative);
@@ -230,21 +235,15 @@ function render(id, json, cb) {
 					codeLines.splice(lineIdx + 1 + int, 0, insertlines[int]);
 				}
 				codeLines[lineIdx+int+1] = after + codeLines[lineIdx+int+1];
-			} else if (!isNaN(code)) {
-				if (typeof oldcode !== 'undefined' && code!=oldcode) {
-					line = excape(line.substr(0, open), lineIdx + relative) + " } else if (httpStatusCode == " + code + ") {" + excape(line.substr(close + 2), lineIdx + relative, false);
-				} else {
-					line = excape(line.substr(0, open), lineIdx + relative) + " if (httpStatusCode == " + code + ") {" + excape(line.substr(close + 2), lineIdx + relative, false);
-				}
-				oldcode=code;
 			} else if (isStatusCode) {
 				var undefinedBefore = typeof statusCodes[statusCodes.length - 1] == 'undefined';
 				var code = (cmd[2] + cmd[3] + cmd[4]) * 1;
+				oldcode = code;
 				statusCodes[statusCodes.length - 1] = code;
 				if (undefinedBefore) {
-					line = excape(line.substr(0, open), lineIdx + relative) + " if (httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + excape(line.substr(close + 2), lineIdx + relative, false);
+					line = excape(line.substr(0, open), lineIdx + relative) + " if (typeof httpStatusCode !== 'undefined' && httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + excape(line.substr(close + 2), lineIdx + relative, false);
 				} else {
-					line = excape(line.substr(0, open), lineIdx + relative) + " } else if (httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + excape(line.substr(close + 2), lineIdx + relative, false);
+					line = excape(line.substr(0, open), lineIdx + relative) + " } else if (typeof httpStatusCode !== 'undefined' && httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + excape(line.substr(close + 2), lineIdx + relative, false);
 				}
 			} else {
 				var array = line.split("{{");
@@ -272,8 +271,8 @@ function render(id, json, cb) {
 	if (thr !== undefined) {
 		throw "Caused by Throw-Attribute: "+ script;
 	}
-	// throw script;
 	try {
+		
 		f = new Function(script);
 	} catch (e) {
 		throw script;
@@ -291,5 +290,4 @@ function render(id, json, cb) {
 	homeworkObject.txt = f(json, homeworkObject);
 	if (homeworkObject.tasksOutstanding == 0)
 		(cb(homeworkObject.txt));
-	
 }

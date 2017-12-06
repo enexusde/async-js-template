@@ -26,10 +26,8 @@
 			<verifyInputField htmlId="result6" value="123" />
 
 			<clickElement htmlId="test7" />
-			<retry description="retry nested steps until the visit count is 3" maxcount="10">
-				<sleep milliseconds="200" />
-				<verifyInputField htmlId="result7" value="Missing" />
-			</retry>
+			<sleep milliseconds="100" />
+			<verifyInputField htmlId="result7" value="test-request404-response-404-request500--response-500" />
 		</webtest>
 	</target>
 </project>

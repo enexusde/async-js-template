@@ -93,9 +93,20 @@
 	<input id="result6" value="" />
 
 	<script id="work7" type="text/x-jsrender" relative="69">
-		{{load 'missing-file.json'}}
+		test
+		{{load '404.json'}}
+			-request404
+			{{200}}
+			-response-200
 			{{404}}
-			Missing
+			-response-404
+			{{load '500.json'}}
+				-request500-
+				{{200}}
+				-response-200
+				{{500}}
+				-response-500
+			{{/load}}
 		{{/load}}
 	</script>
 	<button id="test7" onclick="r(7,{count:3});">test7</button>
