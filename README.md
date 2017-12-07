@@ -142,7 +142,7 @@ Import also works, but be warned: Its hard to debug imports because the linenumb
 
 ## Variables
 
-A list of variables used by asjst helps in compatiblity-reasons, they are globaly defined.
+A list of variables used by asjst helps in compatiblity-reasons, they are defined directly under the global variable ```asjst```.
 
 | Variable Name | Meaning                                                                                      | Default value | Example                                                               | Hints                                                                                                                                                           |
 |---------------|----------------------------------------------------------------------------------------------|---------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
