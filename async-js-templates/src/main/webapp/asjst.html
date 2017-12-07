@@ -15,7 +15,7 @@
 <body>
 	<script>
 		function r(no, json) {
-			render('work' + no, json, function(html) {
+			asjst.render('work' + no, json, function(html) {
 				var html2 = html.replace(/\s/g, '');
 				$('#result' + no).val(html2);
 			});

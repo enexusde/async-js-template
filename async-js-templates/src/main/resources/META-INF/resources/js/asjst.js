@@ -1,100 +1,107 @@
-var asjstDbg = true;
-var varlbl = "crdxf";
-var indexVar = 'index';
-var evenVar = 'even';
-var oddVar = 'odd';
-var baseURL = '';
-var ajaxOptions = {};
-var spf = '🎸';
-var epf = '🎻';
-// general exception interception line number of last successfull code line
-var geilnolscl = undefined;
+var asjst = {
+	unresolvedResult : "",
+	asjstDbg : false,
+	varlbl : "crdxf",
+	indexVar : 'index',
+	evenVar : 'even',
+	oddVar : 'odd',
+	ajaxOptions : {},
+	spf : '🎸',
+	epf : '🎻',
+	geilnolscl : undefined
+};
 
-function allResultsExists(homeworkObject){
+asjst.allResultsExists = function(homeworkObject) {
 	return homeworkObject.tasksOutstanding == homeworkObject.tasksSolved;
 }
 
-function excape(line, no, linebreakDefaultTrue) {
+asjst.excape = function(line, no, linebreakDefaultTrue) {
 	var l = arguments.length;
 	if (l == 1)
 		throw "Need lineNo";
 	var pfx = l === 2 ? '\\n' : '';
 	if (line.indexOf("'") == -1) { // no '
-		line = varlbl + " += '" + pfx + line + "';";
+		line = asjst.varlbl + " += '" + pfx + line + "';";
 	} else if (line.indexOf('"') == -1) { // no "
-		line = varlbl + ' += "' + pfx + line + '";';
+		line = asjst.varlbl + ' += "' + pfx + line + '";';
 	} else { // " and '
 		var tueddelchenParts = line.split('"');
 		line = tueddelchenParts.join('\\"')
-		line = varlbl + ' += "' + pfx + line + '";';
+		line = asjst.varlbl + ' += "' + pfx + line + '";';
 	}
 	return line;
 }
 
-var unresolvedResult = "";
-function load(lineNo, url, extra, fn, homeworkObject) {
+asjst.load = function(lineNo, url, extra, fn, homeworkObject) {
 	var e = ++homeworkObject.tasksOutstanding;
 	homeworkObject["call" + e] = {
-		placeholder : spf + e + epf
+		placeholder : asjst.spf + e + asjst.epf
 	};
-	
+
 	function solve(txt) {
 		homeworkObject["call" + e].value = txt;
-		homeworkObject.tasksSolved ++;
-		if (allResultsExists(homeworkObject)) {
+		homeworkObject.tasksSolved++;
+		if (asjst.allResultsExists(homeworkObject)) {
 			var txt = homeworkObject.txt;
-			while (txt.indexOf(spf) > -1) {
+			while (txt.indexOf(asjst.spf) > -1) {
 				for (var nr = 1; nr < homeworkObject.tasksSolved + 1; nr++) {
 					var call = homeworkObject["call" + nr];
 					var placeholderPos = txt.indexOf(call.placeholder);
 					if (placeholderPos > -1) {
-						txt = txt.substr(0, placeholderPos) + call.value + txt.substr(placeholderPos + call.placeholder.length);
+						txt = txt.substr(0, placeholderPos)
+								+ call.value
+								+ txt.substr(placeholderPos
+										+ call.placeholder.length);
 					}
 				}
 			}
 			homeworkObject.func(txt);
 		}
 	}
-	function handleTemplateError(e){
+	function handleTemplateError(e) {
 		if (typeof e.stack === 'undefined')
 			throw e;
 		var source = e.stack.split("\n")[1].split(":");
-		var msg = e.message 
+		var msg = e.message
 		if (typeof geilnolscl !== 'undefined') {
 			msg += ' after line ' + geilnolscl;
 		}
 		if (typeof SyntaxError === 'function') {
 			throw new SyntaxError(msg, document.location.pathname, lineNo);
-		} else throw msg + " in async block of line " + lineNo;
+		} else
+			throw msg + " in async block of line " + lineNo;
 	}
 	function incomming(data) {
-		homeworkObject.cache[url] = {incommingData:data};
+		homeworkObject.cache[url] = {
+			incommingData : data
+		};
 		var txt;
 		try {
 			txt = fn(data);
-		} catch(e) {
+		} catch (e) {
 			handleTemplateError(e);
 		}
 		solve(txt);
 	}
 	function errorhandler(xhr) {
-		homeworkObject.cache[url] = {errorhandlerData:xhr};
+		homeworkObject.cache[url] = {
+			errorhandlerData : xhr
+		};
 		var txt;
 		var jsonObject = {
-			httpStatusCode: xhr.status
+			httpStatusCode : xhr.status
 		};
 		try {
 			txt = fn(jsonObject);
-		} catch(e) {
+		} catch (e) {
 			handleTemplateError(e);
 		}
 		solve(txt);
 	}
-	
-	
-	if(typeof homeworkObject.cache[url] !== 'undefined'){
+
+	if (typeof homeworkObject.cache[url] !== 'undefined') {
 		var cache = homeworkObject.cache[url];
-		if (typeof cache.incommingData !== 'undefined'){
+		if (typeof cache.incommingData !== 'undefined') {
 			incomming(cache.incommingData);
 		} else {
 			errorhandler(cache.errorhandlerData);
@@ -108,15 +115,14 @@ function load(lineNo, url, extra, fn, homeworkObject) {
 			success : incomming,
 			error : errorhandler
 		};
-		jQuery.extend(true, opts, ajaxOptions);
-	
+		jQuery.extend(true, opts, asjst.ajaxOptions);
 		jQuery.ajax(opts)
 	}
 	var ph = homeworkObject["call" + e].placeholder;
 	return ph;
 }
 
-function render(id, json, cb) {
+asjst.render = function (id, json, cb) {
 
 	var origId = id;
 
@@ -124,7 +130,7 @@ function render(id, json, cb) {
 		throw "Callback can not be undefined!";
 	}
 	if (typeof id === 'undefined') {
-		if (asjstDbg)
+		if (asjst.asjstDbg)
 			console.error("node to render is undefined");
 		return id;
 	}
@@ -132,13 +138,13 @@ function render(id, json, cb) {
 		var tid = $(id);
 		if (typeof tid == 'object') {
 			if (tid.length === 0) {
-				tid = $('#' + id);
+					tid = $('#' + id);
 			}
 		}
 		id = tid;
 	}
 	if (id.length !== 1) {
-		if (asjstDbg) {
+		if (asjst.asjstDbg) {
 			throw "node to render (selected/found by '" + origId + "') must resolve one element";
 		}
 		return id;
@@ -154,7 +160,7 @@ function render(id, json, cb) {
 	}
 	var code = id.html();
 	if (typeof json === 'undefined') {
-		if (asjstDbg) {
+		if (asjst.asjstDbg) {
 			throw "since the json is undefined: render() returns unparsed.";
 		}
 		return code;
@@ -191,32 +197,32 @@ function render(id, json, cb) {
 
 			if (openIf) {
 				var startExp = open + 4;
-				line = excape(line.substr(0, open), lineIdx + relative) + " if (" + line.substr(startExp, close - startExp) + ") {"
-						+ excape(line.substr(close + 2), lineIdx + relative);
+				line = asjst.excape(line.substr(0, open), lineIdx + relative) + " if (" + line.substr(startExp, close - startExp) + ") {"
+						+ asjst.excape(line.substr(close + 2), lineIdx + relative);
 			} else if (closeIf) {
-				line = excape(line.substr(0, open), lineIdx + relative) + "} " + excape(line.substr(close + 2), lineIdx + relative);
+				line = asjst.excape(line.substr(0, open), lineIdx + relative) + "} " + asjst.excape(line.substr(close + 2), lineIdx + relative);
 			} else if (elseIfCond) {
 				var startExp = open + 9;
-				line = excape(line.substr(0, open), lineIdx + relative) + "} else if (" + line.substr(startExp, close - startExp) + "){"
-						+ excape(line.substr(close + 2), lineIdx + relative);
+				line = asjst.excape(line.substr(0, open), lineIdx + relative) + "} else if (" + line.substr(startExp, close - startExp) + "){"
+						+ asjst.excape(line.substr(close + 2), lineIdx + relative);
 			} else if (elseIf) {
-				line = excape(line.substr(0, open), lineIdx + relative) + "} else {" + excape(line.substr(close + 2), lineIdx + relative);
+				line = asjst.excape(line.substr(0, open), lineIdx + relative) + "} else {" + asjst.excape(line.substr(close + 2), lineIdx + relative);
 			} else if (openFor) {
 				no++;
 				var list = cmd.substr(6, cmd.length - 8);
 				var idx = 'c' + no;
-				line = excape(line.substr(0, open), lineIdx + relative) + ';var mkkd' + lineIdx + '=' + list + '; for (var ' + idx + " in mkkd" + lineIdx + ") with(mkkd" + lineIdx
-						+ "[" + idx + "]) {" + indexVar + "=" + idx + " * 1; " + evenVar + "=" + indexVar + " % 2 == 0;" + oddVar + "=!" + evenVar + "; it = mkkd" + lineIdx + "["
-						+ indexVar + "];" + excape(line.substr(close + 2), lineIdx + relative);
+				line = asjst.excape(line.substr(0, open), lineIdx + relative) + ';var mkkd' + lineIdx + '=' + list + '; for (var ' + idx + " in mkkd" + lineIdx + ") with(mkkd" + lineIdx
+						+ "[" + idx + "]) {" + asjst.indexVar + "=" + idx + " * 1; " + asjst.evenVar + "=" + asjst.indexVar + " % 2 == 0;" + asjst.oddVar + "=!" + asjst.evenVar + "; it = mkkd" + lineIdx + "["
+						+ asjst.indexVar + "];" + asjst.excape(line.substr(close + 2), lineIdx + relative);
 			} else if (closeFor) {
 				no--;
-				line = excape(line.substr(0, open), lineIdx + relative) + "}; it = c" + no + "; " + excape(line.substr(close + 2), lineIdx + relative);
+				line = asjst.excape(line.substr(0, open), lineIdx + relative) + "}; it = c" + no + "; " + asjst.excape(line.substr(close + 2), lineIdx + relative);
 			} else if (openLoad) {
 				statusCodes.push(undefined);
-				line = excape(line.substr(0, open), lineIdx + relative) + " " + varlbl + " += load(" + (lineIdx + relative) + ", " + cmd.substr(7, cmd.length - 9) + ", it, function(it){var "
-						+ varlbl + "=''; with(it){ " + excape(line.substr(close + 2), lineIdx + relative, false);
+				line = asjst.excape(line.substr(0, open), lineIdx + relative) + " " + asjst.varlbl + " += asjst.load(" + (lineIdx + relative) + ", " + cmd.substr(7, cmd.length - 9) + ", it, function(it){var "
+						+ asjst.varlbl + "=''; with(it){ " + asjst.excape(line.substr(close + 2), lineIdx + relative, false);
 			} else if (closeLoad) {
-				line = excape(line.substr(0, open), lineIdx + relative) + " }return " + varlbl + ";}, homeworkObject); " + excape(line.substr(close + 2), lineIdx + relative, false);
+				line = asjst.excape(line.substr(0, open), lineIdx + relative) + " }return " + asjst.varlbl + ";}, homeworkObject); " + asjst.excape(line.substr(close + 2), lineIdx + relative, false);
 				var thisCode = statusCodes[statusCodes.length - 1];
 				var undefinedBefore = typeof thisCode == 'undefined';
 				statusCodes.pop();
@@ -224,7 +230,7 @@ function render(id, json, cb) {
 					line = "}/*close code "+thisCode+"*/" + line;
 				}
 			} else if (imp) {
-				var newline = excape(line.substr(0, open), lineIdx + relative);
+				var newline = asjst.excape(line.substr(0, open), lineIdx + relative);
 				var after = line.substr(close+2);
 				codeLines[lineIdx] = newline;
 				line = newline;
@@ -241,38 +247,37 @@ function render(id, json, cb) {
 				oldcode = code;
 				statusCodes[statusCodes.length - 1] = code;
 				if (undefinedBefore) {
-					line = excape(line.substr(0, open), lineIdx + relative) + " if (typeof httpStatusCode !== 'undefined' && httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + excape(line.substr(close + 2), lineIdx + relative, false);
+					line = asjst.excape(line.substr(0, open), lineIdx + relative) + " if (typeof httpStatusCode !== 'undefined' && httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + asjst.excape(line.substr(close + 2), lineIdx + relative, false);
 				} else {
-					line = excape(line.substr(0, open), lineIdx + relative) + " } else if (typeof httpStatusCode !== 'undefined' && httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + excape(line.substr(close + 2), lineIdx + relative, false);
+					line = asjst.excape(line.substr(0, open), lineIdx + relative) + " } else if (typeof httpStatusCode !== 'undefined' && httpStatusCode == " + statusCodes[statusCodes.length - 1] + ") { " + asjst.excape(line.substr(close + 2), lineIdx + relative, false);
 				}
 			} else {
 				var array = line.split("{{");
-				line = excape(array[0], lineIdx + relative);
+				line = asjst.excape(array[0], lineIdx + relative);
 				for (var int = 1; int < array.length; int++) {
 					var part = array[int];
 					var last = part.indexOf("}}");
 					if (last == -1) {
 						throw 'Newlines not allowed in expression [:' + (lineIdx + relative) + ']';
 					}
-					line += varlbl + " += (" + part.substr(0, last) + "); ";
+					line += asjst.varlbl + " += (" + part.substr(0, last) + "); ";
 					if (last + 2 < part.length) {
-						line += excape(part.substr(last + 2), lineIdx + relative, false);
+						line += asjst.excape(part.substr(last + 2), lineIdx + relative, false);
 					}
 				}
 			}
 		} else {
-			line = excape(line, lineIdx + relative);
+			line = asjst.excape(line, lineIdx + relative);
 		}
 		codeLines[lineIdx] = '/* ' + (lineIdx + relative) + ' */ ' + line + "geilnolscl="+(lineIdx + relative)+";";
 	}
-	var script = "var currentIdx, " + indexVar + "," + evenVar + "," + oddVar + ", json = arguments[0], homeworkObject = arguments[1], it = json, c0; with (json){var " + varlbl
-			+ "='';" + codeLines.join("\n") + " return " + varlbl + ";}";
+	var script = "var currentIdx, " + asjst.indexVar + "," + asjst.evenVar + "," + asjst.oddVar + ", json = arguments[0], homeworkObject = arguments[1], it = json, c0; with (json){var " + asjst.varlbl
+			+ "='';" + codeLines.join("\n") + " return " + asjst.varlbl + ";}";
 	var f;
 	if (thr !== undefined) {
 		throw "Caused by Throw-Attribute: "+ script;
 	}
 	try {
-		
 		f = new Function(script);
 	} catch (e) {
 		throw script;
