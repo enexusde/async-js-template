@@ -24,7 +24,7 @@ Example:
       {{myFantasticField}}
    </script>
    <button onclick="
-      render( 'foobar', 
+      asjst.render( 'foobar', 
               {myFantasicField:'hello'}, 
               function (htmlIncomming) {
                 alert(htmlIncomming); // alerts 'hello'
@@ -44,7 +44,7 @@ This is easy too, just like this
 {{/for}}
    </script>
    <button onclick="
-      render( 'foobar', 
+      asjst.render( 'foobar', 
               {peoples:[{name:'Mike'},{name:'Marry'}]}, 
               function (htmlIncomming) {
                 alert(htmlIncomming); // alerts 'Mike Marry'
@@ -86,7 +86,7 @@ Loading asynchroneus requests like this:
 {{/load}}
    </script>
    <button onclick="
-      render( 'foobar', 
+      asjst.render( 'foobar', 
               {}, 
               function (htmlIncomming) {
                 alert(htmlIncomming); // alerts 'aha'
@@ -111,7 +111,7 @@ Import also works, but be warned: Its hard to debug imports because the linenumb
      {{import foot}}
    </script>
    <button onclick="
-      render( 'main', 
+      asjst.render( 'main', 
               {}, 
               function (htmlIncomming) {
                 alert(htmlIncomming); // alerts 'MyHead MyFoot'
