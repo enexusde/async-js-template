@@ -88,7 +88,11 @@ Loading asynchroneus requests like this:
 ```
    <script id="foobar" type="text/asjstOrWhatever">
 {{load 'http://www.example.de/rest/abc.json'}}
-  aha
+  I am
+  {{404}}
+     missing.
+  {{200}}
+     available!
 {{/load}}
    </script>
    <button onclick="
