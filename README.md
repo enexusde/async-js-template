@@ -9,6 +9,12 @@ Templateengine for asynchrouneus JSON requests.
 Including the asjst is easy, just include this line anywhere in the header-section of the website.
 `<script src="js/asjst.js"></script>`
 
+## Compatibility
+
+| Framework | Compatibility | Hints          |
+|-----------|---------------|----------------|
+| Npm jade  | Yes           | Check indention|
+
 ## Accessing via Servlet
 
 Since Servet specification 3.0 we could access the asjst.js via java-classpath. Requirement is a [servlet-3.0](http://tomcat.apache.org/whichversion.html) container and the `web.xml`-File having at least version 3.0 like this:
