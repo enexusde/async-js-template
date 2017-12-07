@@ -99,7 +99,7 @@ Loading asynchroneus requests like this:
       asjst.render( 'foobar', 
               {}, 
               function (htmlIncomming) {
-                alert(htmlIncomming); // alerts 'aha'
+                alert(htmlIncomming); // alerts 'I am available!' on code 200 only.
               }
             );">
      Run
