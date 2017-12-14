@@ -9,6 +9,12 @@ Templateengine for asynchrouneus JSON requests.
 Including the asjst is easy, just include this line anywhere in the header-section of the website.
 `<script src="js/asjst.js"></script>`
 
+## Compatibility
+
+| Framework | Compatibility | Hints          |
+|-----------|---------------|----------------|
+| Npm jade  | Yes           | Check indention|
+
 ## Accessing via Servlet
 
 Since Servet specification 3.0 we could access the asjst.js via java-classpath. Requirement is a [servlet-3.0](http://tomcat.apache.org/whichversion.html) container and the `web.xml`-File having at least version 3.0 like this:
@@ -24,7 +30,7 @@ Example:
       {{myFantasticField}}
    </script>
    <button onclick="
-      render( 'foobar', 
+      asjst.render( 'foobar', 
               {myFantasicField:'hello'}, 
               function (htmlIncomming) {
                 alert(htmlIncomming); // alerts 'hello'
@@ -44,7 +50,7 @@ This is easy too, just like this
 {{/for}}
    </script>
    <button onclick="
-      render( 'foobar', 
+      asjst.render( 'foobar', 
               {peoples:[{name:'Mike'},{name:'Marry'}]}, 
               function (htmlIncomming) {
                 alert(htmlIncomming); // alerts 'Mike Marry'
@@ -82,14 +88,18 @@ Loading asynchroneus requests like this:
 ```
    <script id="foobar" type="text/asjstOrWhatever">
 {{load 'http://www.example.de/rest/abc.json'}}
-  aha
+  I am
+  {{404}}
+     missing.
+  {{200}}
+     available!
 {{/load}}
    </script>
    <button onclick="
-      render( 'foobar', 
+      asjst.render( 'foobar', 
               {}, 
               function (htmlIncomming) {
-                alert(htmlIncomming); // alerts 'aha'
+                alert(htmlIncomming); // alerts 'I am available!' on code 200 only.
               }
             );">
      Run
@@ -111,7 +121,7 @@ Import also works, but be warned: Its hard to debug imports because the linenumb
      {{import foot}}
    </script>
    <button onclick="
-      render( 'main', 
+      asjst.render( 'main', 
               {}, 
               function (htmlIncomming) {
                 alert(htmlIncomming); // alerts 'MyHead MyFoot'
@@ -132,7 +142,7 @@ Import also works, but be warned: Its hard to debug imports because the linenumb
 
 ## Variables
 
-A list of variables used by asjst helps in compatiblity-reasons, they are globaly defined.
+A list of variables used by asjst helps in compatiblity-reasons, they are defined directly under the global variable ```asjst```.
 
 | Variable Name | Meaning                                                                                      | Default value | Example                                                               | Hints                                                                                                                                                           |
 |---------------|----------------------------------------------------------------------------------------------|---------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
