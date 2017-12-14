@@ -8,7 +8,10 @@ var asjst = {
 	ajaxOptions : {},
 	spf : '🎸',
 	epf : '🎻',
-	geilnolscl : undefined
+	geilnolscl : undefined,
+	getCode: function($e, asImport) {
+		return $e.html();
+	}
 };
 
 asjst.allResultsExists = function(homeworkObject) {
@@ -158,7 +161,7 @@ asjst.render = function (id, json, cb) {
 	if (typeof relative === 'undefined') {
 		relative = 0;
 	}
-	var code = id.html();
+	var code = asjst.getCode(id, false);
 	if (typeof json === 'undefined') {
 		if (asjst.asjstDbg) {
 			throw "since the json is undefined: render() returns unparsed.";
@@ -234,8 +237,12 @@ asjst.render = function (id, json, cb) {
 				var after = line.substr(close+2);
 				codeLines[lineIdx] = newline;
 				line = newline;
-				var lns = $('#'+cmd.substr(9, cmd.length - 11));
-				var insertlines = lns.html().split("\n");
+				var id = cmd.substr(9, cmd.length - 11);
+				var lns = $('#'+id);
+				if (lns.length != 1) {
+					throw 'ID not found or not unique: '+id;
+				}
+				var insertlines = asjst.getCode(lns, true).split("\n");
 				var int = 0;
 				for (; int < insertlines.length; int++) {
 					codeLines.splice(lineIdx + 1 + int, 0, insertlines[int]);
