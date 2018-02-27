@@ -166,7 +166,7 @@ By default a new variable without a scope is not possible by the framework. By t
 
 ## Templating
 Templating is not a core functionality of the library but it is possible to template by using a tricky combination of {{for}} and {{load}}.
-Assuming we like to load two different JSONs we can do it like this:
+Assuming we like to load a json to a reusable scope of html, we can do it like this:
 ```
    <script id="loadtable" type="text/asjstOrWhatever">
      {{load url}}
