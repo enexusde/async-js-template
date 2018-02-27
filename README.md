@@ -154,3 +154,37 @@ A list of variables used by asjst helps in compatiblity-reasons, they are define
 | ajaxOptions   | The options to be used by default for ajax-operations.                                       | {}            | {crossDomain:true}                                                    | url, contentType, processData, dataType, error, success are set by asjst you can override the values here, but take care: to override url is not the best idea. |
 | spf/epf       | The joker-marker to find replaceables (start placeholder function/ end placeholder function) | 🎸/🎻         | {{import ticktack}}🎸1🎻                                              | Every import and load will create placeholders having an index surrouded by spf/epf;                                                                            |
 
+# Advanced
+This section has been added because of further requirements. They are not an extension to the existing library! 
+## Create variables
+By default a new variable without a scope is not possible by the framework. By tricky using {{for}} we can refer the contents of a variable to a new scope.
+```
+   {{for [base:2, exponent:2]}}
+     {{base ^ exponent}}
+   {{/for}}
+```
+
+## Templating
+Templating is not a core functionality of the library but it is possible to template by using a tricky combination of {{for}} and {{load}}.
+Assuming we like to load two different JSONs we can do it like this:
+```
+   <script id="loadtable" type="text/asjstOrWhatever">
+     {{load url}}
+        <table>
+          {{for it}}
+            <tr>
+              {{for [jsonRow:it, cols:cols]}}
+                {{for cols}}
+                  <td>{{jsonRow[it]}}</td>
+                {{/for}}
+              {{/for}}
+            </tr>
+          {{/for}}
+        </table>
+     {{/load}}
+   </script>
+   ...
+   {{for [url: 'http://localhost/teachers', cols:['firstname','lastname']]
+     {{import loadtable}}
+   {{/for}}
+```
