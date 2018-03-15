@@ -125,7 +125,10 @@ asjst.load = function(lineNo, url, extra, fn, homeworkObject) {
 	return ph;
 }
 
-asjst.render = function (id, json, cb) {
+asjst.render = function (id, json, cb, c) {
+	if (typeof c === 'undefined') {
+		c={};
+	}
 
 	var origId = id;
 
@@ -297,7 +300,7 @@ asjst.render = function (id, json, cb) {
 		func : cb,
 		tasksOutstanding : 0,
 		tasksSolved : 0,
-		cache: {}
+		cache: c
 	};
 	homeworkObject.txt = f(json, homeworkObject);
 	if (homeworkObject.tasksOutstanding == 0)
