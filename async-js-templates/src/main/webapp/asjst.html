@@ -70,9 +70,9 @@
 	<input id="result4" value="" />
 	<br />
 
-	<script id="btn" type="text/x-jsrender" relative="65">3{{text}}5</script>
+	<script id="btn" type="text/x-jsrender" relative="73">3{{text}}5</script>
 
-	<script id="work5" type="text/x-jsrender" relative="71">0
+	<script id="work5" type="text/x-jsrender" relative="75">0
 {{for lst}}1
 2{{import btn}}6
 7{{/for}}8</script>
@@ -83,7 +83,7 @@
 
 
 
-	<script id="work6" type="text/x-jsrender" relative="69">
+	<script id="work6" type="text/x-jsrender" relative="86">
 		{{for new Array(count).join(',').split(',')}}
 			{{index + 1}}
 		{{/for}}
@@ -92,7 +92,7 @@
 	<button id="test6" onclick="r(6,{count:3});">test6</button>
 	<input id="result6" value="" />
 
-	<script id="work7" type="text/x-jsrender" relative="69">
+	<script id="work7" type="text/x-jsrender" relative="95">
 		test
 		{{load '404.json'}}
 			-request404
