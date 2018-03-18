@@ -70,7 +70,13 @@ asjst.load = function(lineNo, url, extra, fn, homeworkObject) {
 			msg += ' after line ' + geilnolscl;
 		}
 		if (typeof SyntaxError === 'function') {
-			throw new SyntaxError(msg, document.location.pathname, lineNo);
+			for(var k in homeworkObject.lineToPhys) {
+				if (homeworkObject.lineToPhys[k].line == source[source.length - 2] * 1) {
+					lineNo = homeworkObject.lineToPhys[k].phys;
+					break;
+				}
+			}
+			throw new SyntaxError(msg + '(:' + lineNo + ')', document.location.pathname, lineNo);
 		} else
 			throw msg + " in async block of line " + lineNo;
 	}
@@ -173,6 +179,10 @@ asjst.render = function (id, json, cb, c) {
 	}
 	var no = 0;
 	var codeLines = code.split("\n");
+	var lineToPhys = "";
+	for (var line in codeLines) {
+		lineToPhys += ",{phys:" + (line * 1 + relative - 1) + ", line:" + line + "}";
+	}
 	var statusCodes=[];
 	var oldcode;
 	for (var lineIdx = 0; lineIdx < codeLines.length; lineIdx++) {
@@ -245,10 +255,12 @@ asjst.render = function (id, json, cb, c) {
 				if (lns.length != 1) {
 					throw 'ID not found or not unique: '+id;
 				}
+				var rel = lns.attr('relative') * 1;
 				var insertlines = asjst.getCode(lns, true).split("\n");
 				var int = 0;
 				for (; int < insertlines.length; int++) {
 					codeLines.splice(lineIdx + 1 + int, 0, insertlines[int]);
+					lineToPhys += ",{phys:" + (int + rel) + ", line:" + (lineIdx + 2 + int) + "}";
 				}
 				codeLines[lineIdx+int+1] = after + codeLines[lineIdx+int+1];
 			} else if (isStatusCode) {
@@ -279,10 +291,10 @@ asjst.render = function (id, json, cb, c) {
 		} else {
 			line = asjst.excape(line, lineIdx + relative);
 		}
-		codeLines[lineIdx] = '/* ' + (lineIdx + relative) + ' */ ' + line + "geilnolscl="+(lineIdx + relative)+";";
+		codeLines[lineIdx] = '/* ' + (lineIdx + relative) + ' */ ' + line;
 	}
-	var script = "var currentIdx, " + asjst.indexVar + "," + asjst.evenVar + "," + asjst.oddVar + ", json = arguments[0], homeworkObject = arguments[1], it = json, c0; with (json){var " + asjst.varlbl
-			+ "='';" + codeLines.join("\n") + " return " + asjst.varlbl + ";}";
+	var script = "var lineToPhys = [" + lineToPhys.substring(1) + "], currentIdx, " + asjst.indexVar + "," + asjst.evenVar + "," + asjst.oddVar + ", json = arguments[0], homeworkObject = arguments[1], it = json, c0; homeworkObject.lineToPhys=lineToPhys; try{ with (json){var " + asjst.varlbl
+			+ "='';" + codeLines.join("\n") + " return " + asjst.varlbl + ";} } catch(e){for(var k in lineToPhys) {if (lineToPhys[k].line==e.lineNumber) throw e + '(:' + lineToPhys[k].phys + ')';} throw e + ' (:<"+lineToPhys+">)'+e.lineNumber;}";
 	var f;
 	if (thr !== undefined) {
 		throw "Caused by Throw-Attribute: "+ script;
