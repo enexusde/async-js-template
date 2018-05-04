@@ -302,7 +302,6 @@ asjst.render = function (id, json, cb, c) {
 	try {
 		f = new Function(script);
 	} catch (e) {
-		throw script;
 		if (e.lineNumber != undefined) {
 			codeLines[e.lineNumber - 1] = codeLines[e.lineNumber - 1] + "   <------------------------------------- " + e.message;
 		}
