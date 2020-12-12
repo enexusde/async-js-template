@@ -1,3 +1,6 @@
+![Java CI with Maven](https://github.com/enexusde/async-js-template/workflows/Java%20CI%20with%20Maven/badge.svg)
+
+
 <img src="sync.png" height="250"/>&nbsp;<img src="Bildschirmfoto 2017-05-19 um 14.39.57.png" height="250"/>
 
 # async-js-template
