@@ -176,7 +176,7 @@ Assuming we like to load a json to a reusable scope of html, we can do it like t
         <table>
           {{for it}}
             <tr>
-              {{for [jsonRow:it, cols:cols]}}
+              {{for [{jsonRow:it, cols:cols}]}}
                 {{for cols}}
                   <td>{{jsonRow[it]}}</td>
                 {{/for}}
@@ -187,7 +187,7 @@ Assuming we like to load a json to a reusable scope of html, we can do it like t
      {{/load}}
    </script>
    ...
-   {{for [url: 'http://localhost/teachers', cols:['firstname','lastname']]
+   {{for [{url: 'http://localhost/teachers', cols:['firstname','lastname']}]
      {{import loadtable}}
    {{/for}}
 ```
